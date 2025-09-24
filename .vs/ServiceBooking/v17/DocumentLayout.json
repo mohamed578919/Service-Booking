@@ -316,8 +316,7 @@
               "RelativeToolTip": "ServiceBooking\\Controllers\\RequestsController.cs",
               "ViewState": "AgIAAKoAAAAAAAAAAAAAALMAAAAiAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-20T22:54:08.407Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-20T22:54:08.407Z"
             },
             {
               "$type": "Document",
@@ -329,8 +328,7 @@
               "RelativeToolTip": "ServiceBooking\\appsettings.json",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAfAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-08-20T21:26:44.078Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-20T21:26:44.078Z"
             },
             {
               "$type": "Document",
@@ -342,8 +340,7 @@
               "RelativeToolTip": "ServiceBooking\\Models\\ChatMessage.cs",
               "ViewState": "AgIAAAEAAAAAAAAAAAAAAAoAAAAoAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-21T07:16:50.791Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-21T07:16:50.791Z"
             },
             {
               "$type": "Document",
@@ -353,7 +350,7 @@
               "RelativeDocumentMoniker": "ServiceBooking\\Models\\MyContext.cs",
               "ToolTip": "C:\\Users\\androw\\Downloads\\ServiceBooking\\ServiceBooking\\ServiceBooking\\Models\\MyContext.cs",
               "RelativeToolTip": "ServiceBooking\\Models\\MyContext.cs",
-              "ViewState": "AgIAABAAAAAAAAAAAAAAwBsAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAABAAAAAAAAAAAAAAwBwAAAA0AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-08-21T07:17:46.542Z",
               "EditorCaption": ""
@@ -368,8 +365,7 @@
               "RelativeToolTip": "ServiceBooking\\Controllers\\AccountController.cs",
               "ViewState": "AgIAAMAAAAAAAAAAAAAAAM4AAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-20T22:18:37.925Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-20T22:18:37.925Z"
             },
             {
               "$type": "Document",
@@ -381,8 +377,7 @@
               "RelativeToolTip": "ServiceBooking\\Controllers\\ServicesController.cs",
               "ViewState": "AgIAABcAAAAAAAAAAADwvycAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-22T00:38:31.914Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-22T00:38:31.914Z"
             },
             {
               "$type": "Document",
@@ -394,8 +389,7 @@
               "RelativeToolTip": "ServiceBooking\\Controllers\\ClientController.cs",
               "ViewState": "AgIAAFcAAAAAAAAAAAAAAFcAAAAlAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-21T08:55:50.381Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-21T08:55:50.381Z"
             },
             {
               "$type": "Document",
