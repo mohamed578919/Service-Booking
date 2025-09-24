@@ -24,7 +24,7 @@ Built with **ASP.NET Core Web API** for the backend and designed to handle both 
 - **Frontend (Optional):** Angular / React (or any client app)  
 - **Email Service:** SMTP for verification codes  
 
-## 🚀 Getting Started
+##  Getting Started
 1. Clone the repository  
    ```bash
    git clone https://github.com/your-username/ServiceBookingPlatform.git
