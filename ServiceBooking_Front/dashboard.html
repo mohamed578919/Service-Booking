@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f7fa;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .card {
+      background: white;
+      padding: 20px 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      width: 320px;
+    }
+    .card h2 {
+      margin-bottom: 20px;
+      font-size: 20px;
+      text-align: center;
+    }
+    .info {
+      margin: 10px 0;
+      font-size: 15px;
+    }
+    .label {
+      font-weight: bold;
+      display: inline-block;
+      width: 100px;
+    }
+    .value {
+      color: #333;
+    }
+  </style>
+</head>
+<body onload="loadProfile()">
+  <div class="card">
+    <h2>Profile Info</h2>
+
+    <div class="info"><span class="label">Full Name:</span> <span id="fullname" class="value">...</span></div>
+    <div class="info"><span class="label">Username:</span> <span id="username" class="value">...</span></div>
+    <div class="info"><span class="label">Email:</span> <span id="email" class="value">...</span></div>
+    <div class="info"><span class="label">Phone:</span> <span id="phone" class="value">...</span></div>
+    <div class="info"><span class="label">Role:</span> <span id="role" class="value">...</span></div>
+    <div class="info"><span class="label">Craft:</span> <span id="craft" class="value">...</span></div>
+  </div>
+
+  <script>
+    function loadProfile() {
+      const token = localStorage.getItem("token");
+      console.log("TOKEN:", token);
+
+      if (!token) {
+        alert("You must login first.");
+        window.location.href = "login.html";
+        return;
+      }
+
+      fetch("https://localhost:7137/api/Account/profile", {
+        method: "GET",
+        headers: {
+          "Authorization": "Bearer " + token,
+          "Content-Type": "application/json"
+        }
+      })
+      .then(res => {
+        if (res.status === 401) {
+          alert("Unauthorized. Please login again.");
+          localStorage.removeItem("token");
+          window.location.href = "login.html";
+          throw new Error("Unauthorized");
+        }
+        return res.json();
+      })
+      .then(data => {
+        console.log("Profile Data:", data);
+        document.getElementById("fullname").innerText = data.fullName || "-";
+        document.getElementById("username").innerText = data.userName || "-";
+        document.getElementById("email").innerText = data.email || "-";
+        document.getElementById("phone").innerText = data.phoneNumber || "-";
+        document.getElementById("role").innerText = data.role || "-";
+        document.getElementById("craft").innerText = data.craft || "-";
+      })
+      .catch(err => console.error(err));
+    }
+  </script>
+</body>
+</html>

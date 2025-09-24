@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PayPal Checkout Example</title>
+  <style>
+    /* نخلي الـ div في النص وصغير */
+    #paypal-container {
+      display: none; /* مخفي في البداية */
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      width: 300px;
+      text-align: center;
+    }
+    #paypal-button-container {
+      margin-top: 15px;
+    }
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+    }
+  </style>
+</head>
+<body>
+
+ 
+
+  <!-- زرار اللي بيفتح البوب اب -->
+  <button id="showPayPal" >💳 ادفع الآن</button>
+
+  <!-- Overlay و Container -->
+  <div class="overlay" id="overlay"></div>
+  <div id="paypal-container">
+    <h3>اختار وسيلة الدفع</h3>
+    <div id="paypal-button-container"></div>
+    <button onclick="closePayPal()">❌ إلغاء</button>
+  </div>
+
+  <!-- SDK PayPal -->
+  <script src="https://www.paypal.com/sdk/js?client-id=ARq8EGfg10WyGEjVGliMZvYiwu9kHPPBy5k9ORGRwBFAWyMeJYtrb3eJrnvg8ksoXssmLnrIYC2-zzGt&currency=USD&components=buttons"></script>
+
+  <script>
+    // إظهار الـ div
+    document.getElementById("showPayPal").addEventListener("click", function() {
+      document.getElementById("paypal-container").style.display = "block";
+      document.getElementById("overlay").style.display = "block";
+    });
+
+    // إغلاق الـ div
+    function closePayPal() {
+      document.getElementById("paypal-container").style.display = "none";
+      document.getElementById("overlay").style.display = "none";
+    }
+
+    // زرار PayPal
+    paypal.Buttons({
+      createOrder: function(data, actions) {
+        return actions.order.create({
+          purchase_units: [{
+            amount: { value: '20.00' } // المبلغ
+          }]
+        });
+      },
+      onApprove: function(data, actions) {
+        return actions.order.capture().then(function(details) {
+          alert('✅ تمت العملية بنجاح بواسطة: ' + details.payer.name.given_name);
+          closePayPal();
+        });
+      },
+      onError: function(err) {
+        console.error(err);
+        alert('❌ حصل خطأ أثناء عملية الدفع');
+        closePayPal();
+      }
+    }).render('#paypal-button-container');
+  </script>
+
+</body>
+</html>

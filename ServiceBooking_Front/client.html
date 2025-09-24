@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة التحكم</title>
+ <style>
+  /* لوحة ألوان مطابقة للصورة */
+  :root{
+    --bg:#eef2f7;            /* خلفية عامة رمادي فاتح */
+    --surface:#ffffff;       /* خلفية الكروت/الشريط العلوي/القائمة */
+    --sidebar-bg:#ffffff;    /* خلفية الـ Sidebar */
+    --text:#111827;          /* لون النص الأساسي */
+    --muted:#6b7280;         /* نص ثانوي */
+    --primary:#0d6efd;       /* الأزرق الأساسي */
+    --primary-600:#0b5ed7;   /* أغمق للهوفر */
+    --ring:#eaf2ff;          /* خلفية تحديد العنصر بالقائمة */
+    --ring-border:#cfe2ff;   /* حافة تحديد العنصر */
+    --border:#e5e7eb;        /* حدود خفيفة */
+    --shadow:0 4px 10px rgba(0,0,0,.06);
+    --danger:#dc3545;
+    --success:#28a745;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    font-family:'Segoe UI',Tahoma,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+    display:flex;
+  }
+
+  /* Sidebar */
+  aside{
+    width:240px;
+    background:var(--sidebar-bg);
+    padding:1rem;
+    box-shadow:2px 0 5px rgba(0,0,0,.05);
+  }
+  aside h2{
+    text-align:center;
+    font-size:1.1rem;
+    margin-bottom:1.5rem;
+  }
+  aside nav a{
+    display:block;
+    padding:.75rem 1rem;
+    margin-bottom:.5rem;
+    text-decoration:none;
+    color:#334155;                 /* نص غامق واضح */
+    border-radius:10px;
+    border:1px solid transparent;  /* علشان التأثير يبقى ناعم */
+    transition:.2s ease;
+  }
+  aside nav a:hover,
+  aside nav a.active{
+    background:var(--ring);
+    color:var(--primary);
+    border-color:var(--ring-border);
+  }
+
+  /* Main layout */
+  .main-wrapper{flex:1;display:flex;flex-direction:column}
+
+  /* Topbar */
+  header{
+    background:var(--surface);
+    padding:1rem 2rem;
+    display:flex;justify-content:space-between;align-items:center;
+    border-bottom:1px solid var(--border);
+  }
+  .profile-box{display:flex;align-items:center;gap:1rem}
+  .avatar{
+    width:40px;height:40px;border-radius:50%;
+    background:var(--primary);color:#fff;font-weight:700;
+    display:flex;align-items:center;justify-content:center;
+  }
+
+  /* Buttons */
+  .btn{
+    padding:.5rem 1rem;border:none;border-radius:10px;cursor:pointer
+  }
+  .btn.primary{background:var(--primary);color:#fff}
+  .btn.primary:hover{background:var(--primary-600)}
+  .btn.danger{background:var(--danger);color:#fff}
+
+  /* Content */
+  main{flex:1; padding:2rem; overflow:auto}
+  .card{
+    background:var(--surface);
+    padding:1.25rem 1.5rem;
+    border-radius:14px;
+    box-shadow:var(--shadow);
+    border:1px solid var(--border);
+    margin-bottom:1.5rem;
+  }
+
+  /* Table */
+  table{width:100%;border-collapse:collapse}
+  th,td{padding:.75rem;text-align:right;border-bottom:1px solid var(--border)}
+  th{background:#f8fafc;color:#111827;font-weight:600}
+  td button{
+    background:var(--primary);color:#fff;border:none;
+    padding:.4rem .8rem;border-radius:8px;cursor:pointer
+  }
+  td button:hover{background:var(--primary-600)}
+
+  /* Modals */
+  .modal{
+    display:none;position:fixed;inset:0;
+    background:rgba(0,0,0,.45);align-items:center;justify-content:center
+  }
+  .modal.show{display:flex}
+  .modal-content{
+    background:var(--surface);padding:1.25rem;border-radius:14px;width:420px;
+    box-shadow:var(--shadow);border:1px solid var(--border)
+  }
+  .modal-content label{display:block;margin:.5rem 0;color:#1f2937}
+  .modal-content input,
+  .modal-content textarea,
+  .modal-content select{
+    width:100%;padding:.6rem;border:1px solid var(--border);
+    border-radius:10px;margin-top:.35rem;background:#fff
+  }
+
+  /* Toasts */
+  .toast{
+    position:fixed;top:20px;right:20px;z-index:1000;
+    padding:14px 22px;border-radius:10px;color:#fff;
+    opacity:0;transform:translateY(-12px);transition:.25s
+  }
+  .toast.show{opacity:1;transform:translateY(0)}
+  .toast.success{background:var(--success)}
+  .toast.error{background:var(--danger)}
+  .btn.disabled {
+  background: #9ca3af !important; /* رمادي */
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+</style>
+
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside>
+    <h2>لوحة التحكم</h2>
+    <nav>
+      <a href="#home" class="active">الرئيسية</a>
+      <a href="#requests">طلباتي</a>
+      <a href="#applications">الوظائف المتقدم عليها</a>
+      <a href="#profile">الملف الشخصي</a>
+    </nav>
+  </aside>
+
+  <!-- Main wrapper -->
+  <div class="main-wrapper">
+    <!-- Topbar -->
+    <header>
+      <div class="profile-box">
+        <div id="avatar" class="avatar">A</div>
+        <span id="profileNameShort">اسم العميل</span>
+      </div>
+      <div>
+        <button id="openCreateBtn" class="btn primary">+ طلب جديد</button>
+        <button id="logoutBtn" class="btn danger">تسجيل الخروج</button>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main id="mainContent">
+      <div class="card">
+        <h3>مرحبا بك 👋</h3>
+        <p>هنا سيكون محتوى الطلبات أو الصفحة الرئيسية.</p>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modals (إنشاء/تعديل) -->
+  <div class="modal" id="createModal">
+    <div class="modal-content">
+      <h3>طلب جديد</h3>
+      <form id="createForm">
+        <label>اسم الخدمة:
+          <select id="c_service" required>
+            <option value="">اختر خدمة</option>
+          </select>
+        </label>
+        <label>الوصف:
+          <textarea id="c_description" required></textarea>
+        </label>
+        <button type="submit" class="btn primary">حفظ</button>
+        <button type="button" class="btn" onclick="closeModal('createModal')">إلغاء</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal" id="editModal">
+    <div class="modal-content">
+      <h3>تعديل طلب</h3>
+      <form id="editForm">
+        <input type="hidden" id="e_id" />
+        <label>اسم الخدمة:
+          <select id="e_service" required>
+            <option value="">اختر خدمة</option>
+          </select>
+        </label>
+        <label>الوصف:
+          <textarea id="e_description" required></textarea>
+        </label>
+        <button type="submit" class="btn primary">حفظ</button>
+        <button type="button" class="btn" onclick="closeModal('editModal')">إلغاء</button>
+      </form>
+    </div>
+  </div>
+  <div id="overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:999;"></div>
+
+<!-- PayPal container -->
+<div id="paypal-container" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;padding:1rem;border-radius:12px;box-shadow:0 4px 10px rgba(0,0,0,0.2);z-index:1000;">
+  <div id="paypal-button-container"></div>
+  <button onclick="closePayPal()" class="btn" style="margin-top:10px;">إغلاق</button>
+</div>
+
+  <!-- JS -->
+   <script>
+    const API_BASE = "https://localhost:7137/api";
+    const token = localStorage.getItem("token");
+    if (!token) {
+      window.location.href = "login.html";
+    }
+
+    const headersAuth = { "Authorization": "Bearer " + token, "Content-Type": "application/json" };
+
+    function parseJwt(token) {
+      try {
+        if (!token || typeof token !== "string" || token.split('.').length !== 3) {
+          throw new Error("Invalid JWT token format");
+        }
+        const base64 = token.split('.')[1].replace('-', '+').replace('_', '/');
+        const decoded = JSON.parse(atob(base64));
+        if (!decoded || typeof decoded !== "object") {
+          throw new Error("Invalid JWT payload");
+        }
+        return decoded;
+      } catch (e) {
+        console.error("Failed to parse JWT:", e.message);
+        return null;
+      }
+    }
+
+    async function loadServices(selectId) {
+      try {
+        const res = await fetch(`${API_BASE}/Service/GetServiceNames`, { headers: headersAuth });
+        if (!res.ok) {
+          throw new Error(`فشل تحميل الخدمات: ${res.status} ${res.statusText}`);
+        }
+        const services = await res.json();
+        const select = document.getElementById(selectId);
+        select.innerHTML = '<option value="">اختر خدمة</option>';
+        services.forEach(name => {
+          const option = document.createElement("option");
+          option.value = name;
+          option.textContent = name;
+          select.appendChild(option);
+        });
+      } catch (e) {
+        console.error("خطأ في تحميل الخدمات:", e.message);
+        showToast("فشل تحميل الخدمات. يمكنك إدخال اسم الخدمة يدويًا.", "error");
+        const select = document.getElementById(selectId);
+        select.outerHTML = `<input type="text" id="${selectId}" required placeholder="أدخل اسم الخدمة" />`;
+      }
+    }
+
+    async function loadProfile() {
+      const decoded = parseJwt(token);
+      if (!decoded) {
+        localStorage.removeItem("token");
+        window.location.href = "login.html";
+        return;
+      }
+      const userName = decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"] || "Zekry";
+      const res = await fetch(`${API_BASE}/Client/me?ClientUserNamed=${encodeURIComponent(userName)}`, { headers: headersAuth });
+      if (res.ok) {
+        const profile = await res.json();
+        document.getElementById("profileNameShort").textContent = `${profile.fullName.split(" ")[0][0]}. ${profile.fullName}`;
+        document.getElementById("avatar").textContent = profile.fullName.split(" ")[0][0];
+        window.clientProfile = profile;
+        router();
+      } else {
+        console.error("فشل تحميل البروفايل:", await res.text());
+        showToast("فشل تحميل البروفايل. حاول مرة أخرى.", "error");
+        localStorage.removeItem("token");
+        window.location.href = "login.html";
+      }
+    }
+
+    function openModal(id) { document.getElementById(id).classList.add("show"); }
+    function closeModal(id) { document.getElementById(id).classList.remove("show"); }
+
+    // دالة عرض التوست
+    function showToast(message, type = "success") {
+      const toast = document.createElement("div");
+      toast.className = `toast ${type}`;
+      toast.textContent = message;
+      document.body.appendChild(toast);
+
+      // إظهار التوست
+      setTimeout(() => toast.classList.add("show"), 100);
+
+      // إزالة التوست بعد 3 ثواني
+      setTimeout(() => {
+        toast.classList.remove("show");
+        setTimeout(() => toast.remove(), 300); // إزالة بعد انتهاء التحويل
+      }, 3000);
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("logoutBtn").addEventListener("click", () => {
+        localStorage.removeItem("token");
+        window.location.href = "login.html";
+      });
+      document.getElementById("openCreateBtn").addEventListener("click", () => {
+        openModal("createModal");
+      });
+      loadServices("c_service");
+      loadServices("e_service");
+      loadProfile();
+    });
+
+    async function router() {
+  const hash = location.hash || "#home";
+
+  // تحديث الـ active في الـ sidebar
+  document.querySelectorAll("aside nav a").forEach(a => {
+    if (a.getAttribute("href") === hash) {
+      a.classList.add("active");
+    } else {
+      a.classList.remove("active");
+    }
+  });
+
+  if (hash === "#home") renderHome();
+  else if (hash === "#requests") await renderRequests();
+  else if (hash === "#applications") await renderApplications();
+  else if (hash === "#profile") renderProfile();
+}
+
+
+    function renderHome() {
+      const p = window.clientProfile || {};
+      document.getElementById("mainContent").innerHTML = `
+        <div class="card">
+          <h2>مرحبًا، ${p.fullName || "-"} 👋</h2>
+          <p><strong>البريد الإلكتروني:</strong> ${p.email || "-"}</p>
+          <p><strong>رقم الهاتف:</strong> ${p.phone || "-"}</p>
+        </div>`;
+    }
+
+    async function renderRequests() {
+      const decoded = parseJwt(token);
+      if (!decoded) {
+        localStorage.removeItem("token");
+        window.location.href = "login.html";
+        return;
+      }
+      const userName = decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"] || "Zekry";
+      const res = await fetch(`${API_BASE}/Request/${encodeURIComponent(userName)}`, { headers: headersAuth });
+      if (res.ok) {
+        const requests = await res.json();
+        console.log("Requests data:", JSON.stringify(requests, null, 2));
+        if (requests.length === 0) {
+          document.getElementById("mainContent").innerHTML = `
+            <div class="card">
+              <h2>طلباتي</h2>
+              <p class="empty-message">لا توجد طلبات حاليًا. قم بإنشاء طلب جديد!</p>
+            </div>`;
+        } else {
+          document.getElementById("mainContent").innerHTML = `
+            <div class="card">
+              <h2>طلباتي</h2>
+              <table>
+                <thead>
+                  <tr>
+                    <th>اسم الخدمة</th>
+                    <th>التاريخ</th>
+                    <th>الوصف</th>
+                    <th>إجراء</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${requests.map(r => `
+                    <tr>
+                      <td>${r.category || '-'}</td>
+                      <td>${new Date(r.createdAt).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })}</td>
+                      <td>${r.description || '-'}</td>
+                      <td><button onclick="editRequest(${r.id})">تعديل</button></td>
+                    </tr>
+                  `).join("")}
+                </tbody>
+              </table>
+            </div>`;
+        }
+      } else {
+        document.getElementById("mainContent").innerHTML = `
+          <div class="card">
+            <h2>خطأ</h2>
+            <p class="empty-message">فشل تحميل الطلبات. حاول مرة أخرى لاحقًا.</p>
+          </div>`;
+        console.error("فشل تحميل الطلبات:", await res.text());
+      }
+    }
+
+    document.getElementById("createForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const decoded = parseJwt(token);
+      if (!decoded) {
+        localStorage.removeItem("token");
+        window.location.href = "login.html";
+        return;
+      }
+      const userName = decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"] || "Zekry";
+      const data = {
+        ClientUserNamed: userName,
+        Title: document.getElementById("c_service").value,
+        Description: document.getElementById("c_description").value,
+        Service: document.getElementById("c_service").value,
+        Budget: 0
+      };
+      const res = await fetch(`${API_BASE}/Request/Create`, { 
+        method: "POST", 
+        headers: headersAuth, 
+        body: JSON.stringify(data) 
+      });
+      if (res.ok) { 
+        closeModal("createModal"); 
+        await renderRequests(); 
+        showToast("تم إنشاء الطلب بنجاح", "success"); 
+      } else {
+        console.error("فشل إنشاء الطلب:", await res.text());
+        showToast("فشل إنشاء الطلب. تأكد من اختيار خدمة صالحة.", "error");
+      }
+    });
+
+    async function editRequest(id) {
+      if (!id || isNaN(id)) {
+        console.error("Invalid request ID:", id);
+        showToast("فشل تحميل الطلب. الرقم غير صحيح.", "error");
+        return;
+      }
+      const res = await fetch(`${API_BASE}/Request/${id}`, { headers: headersAuth });
+      if (res.ok) {
+        const request = await res.json();
+        document.getElementById("e_id").value = request.id;
+        const select = document.getElementById("e_service");
+        if (select.tagName === "SELECT") {
+          select.value = request.category || request.title;
+        } else {
+          select.value = request.category || request.title;
+        }
+        document.getElementById("e_description").value = request.description;
+        openModal("editModal");
+      } else {
+        const errorText = await res.text();
+        console.error("فشل تحميل الطلب:", errorText);
+        showToast(`فشل تحميل الطلب: ${errorText || "خطأ غير معروف"}`, "error");
+      }
+    }
+
+    document.getElementById("editForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const decoded = parseJwt(token);
+      if (!decoded) {
+        localStorage.removeItem("token");
+        window.location.href = "login.html";
+        return;
+      }
+      const id = document.getElementById("e_id").value;
+      const userName = decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"] || "fahd20";
+      const data = {
+        ClientUserNamed: userName,
+        Title: document.getElementById("e_service").value,
+        Description: document.getElementById("e_description").value,
+        Service: document.getElementById("e_service").value,
+        Budget: 0
+      };
+      const res = await fetch(`${API_BASE}/Request/${id}`, { 
+        method: "PUT", 
+        headers: headersAuth, 
+        body: JSON.stringify(data) 
+      });
+      if (res.ok) { 
+        closeModal("editModal"); 
+        await renderRequests(); 
+        showToast("تم تعديل الطلب بنجاح", "success"); 
+      } else {
+        console.error("فشل التعديل:", await res.text());
+        showToast("فشل تعديل الطلب. تأكد من اختيار خدمة صالحة.", "error");
+      }
+    });
+
+    // ----------- دالة الملف الشخصي -----------
+   function renderProfile() {
+  const p = window.clientProfile || {};
+  document.getElementById("mainContent").innerHTML = `
+    <div class="card">
+      <h2 style="margin-bottom:1rem;">المعلومات الشخصية</h2>
+      <div style="display:grid;gap:1rem;">
+        
+        <div style="display:flex;align-items:center;gap:.75rem;">
+          <span style="font-size:1.2rem; color:var(--primary);">👤</span>
+          <div>
+            <div style="font-weight:600; color:var(--muted);">الاسم الكامل</div>
+            <div style="font-size:1rem;">${p.fullName || "-"}</div>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:.75rem;">
+          <span style="font-size:1.2rem; color:var(--primary);">📧</span>
+          <div>
+            <div style="font-weight:600; color:var(--muted);">البريد الإلكتروني</div>
+            <div style="font-size:1rem;">${p.email || "-"}</div>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:.75rem;">
+          <span style="font-size:1.2rem; color:var(--primary);">📱</span>
+          <div>
+            <div style="font-weight:600; color:var(--muted);">رقم الهاتف</div>
+            <div style="font-size:1rem;">${p.phone || "-"}</div>
+          </div>
+        </div>
+
+      </div>
+    </div>`;
+}
+
+async function renderApplications() {
+  const decoded = parseJwt(token);
+  if (!decoded) {
+    localStorage.removeItem("token");
+    window.location.href = "login.html";
+    return;
+  }
+  const userName = decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"];
+
+  try {
+    const res = await fetch(`${API_BASE}/Request/Applications/${encodeURIComponent(userName)}`, { headers: headersAuth });
+    if (!res.ok) throw new Error(await res.text());
+
+    const applications = await res.json();
+    if (applications.length === 0) {
+      document.getElementById("mainContent").innerHTML = `
+        <div class="card">
+          <h2>الوظائف المتقدم عليها</h2>
+          <p class="empty-message">لا توجد عروض حتى الآن.</p>
+        </div>`;
+    } else {
+      document.getElementById("mainContent").innerHTML = `
+        <div class="card">
+          <h2>الوظائف المتقدم عليها</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>اسم المزود</th>
+                <th>رقم الهاتف</th>
+                <th>الرسالة</th>
+                <th>الطلب</th>
+                <th>الدفع</th>
+                <th>تواصل</th> <!-- عمود جديد -->
+              </tr>
+            </thead>
+            <tbody>
+              ${applications.map(a => {
+                const phone = a.phoneNumber ? a.phoneNumber.replace(/\D/g,'') : "";
+                const waLink = phone ? `https://wa.me/${phone}` : "#";
+                return `
+                  <tr>
+                    <td>${a.providerName}</td>
+                    <td>${a.phoneNumber || "-"}</td>
+                    <td>${a.message || "-"}</td>
+                    <td>${a.requestTitle}</td>
+                    
+                      <td>
+  <button class="btn primary" onclick="openPayPal(this)">ادفع الان</button>
+</td>
+
+                    </td>
+                    <td>
+                      ${phone ? `<a href="${waLink}" target="_blank" class="btn primary disabled" id="wa-${a.id}">واتساب</a>` : "-"}
+
+                    </td>
+                  </tr>`;
+              }).join("")}
+            </tbody>
+          </table>
+        </div>`;
+    }
+  } catch (err) {
+    console.error("فشل تحميل العروض:", err.message);
+    document.getElementById("mainContent").innerHTML = `
+      <div class="card">
+        <h2>خطأ</h2>
+        <p>فشل تحميل العروض. حاول مرة أخرى لاحقًا.</p>
+      </div>`;
+  }
+}
+
+
+    window.addEventListener("hashchange", router);
+    ///////////////////////////////
+    // إظهار الـ div
+   function openPayPal(button) {
+  document.getElementById("paypal-container").style.display = "block";
+  document.getElementById("overlay").style.display = "block";
+
+  // نخزن الـ row أو application ID
+  const row = button.closest("tr");
+  const waBtn = row.querySelector("a.btn");
+
+  const amount = '20.00';
+
+  paypal.Buttons({
+    createOrder: function(data, actions) {
+      return actions.order.create({
+        purchase_units: [{ amount: { value: amount } }]
+      });
+    },
+    onApprove: function(data, actions) {
+      return actions.order.capture().then(function(details) {
+        showToast(`✅ تمت العملية بنجاح بواسطة: ${details.payer.name.given_name}`, "success");
+        // تفعيل زر واتساب
+        if (true) waBtn.classList.remove("disabled");
+        closePayPal();
+      });
+    },
+    onError: function(err) {
+      console.error(err);
+      showToast("❌ حصل خطأ أثناء عملية الدفع", "error");
+      closePayPal();
+    }
+  }).render('#paypal-button-container');
+}
+
+function closePayPal() {
+  const container = document.getElementById("paypal-container");
+  const overlay = document.getElementById("overlay");
+  if(container) container.style.display = "none";
+  if(overlay) overlay.style.display = "none";
+}
+
+  </script>
+  <script src="https://www.paypal.com/sdk/js?client-id=ARq8EGfg10WyGEjVGliMZvYiwu9kHPPBy5k9ORGRwBFAWyMeJYtrb3eJrnvg8ksoXssmLnrIYC2-zzGt&currency=USD&components=buttons"></script>
+
+</body>
+</html>  

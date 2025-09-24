@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verify Account</title>
+<style>
+ body {
+  font-family: Arial, sans-serif;
+  background: #fafafa;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  color: #333;
+}
+
+.container {
+  text-align: center;
+  max-width: 450px;
+  width: 100%;
+  background: #fff;
+  padding: 32px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+h2 {
+  font-size: 22px;
+  font-weight: bold;
+  margin-bottom: 25px;
+}
+
+form input {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  margin: 8px 0px 4px 0px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  outline: none;
+  transition: border 0.2s;
+}
+
+form input:focus {
+  border-color: #2051d8;;
+}
+
+.error {
+  color: red;
+  font-size: 13px;
+  text-align: left;
+  margin-bottom: 6px;
+  display: none;
+}
+
+.success-message {
+  background: #e0f7ec;
+  color: #2051d8;;
+  font-size: 14px;
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  display: none;
+}
+
+button {
+  width: 100%;
+  background: #2051d8;;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  padding: 12px;
+  margin-top: 12px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+button:hover {
+  background: #2051d8;
+}
+
+p {
+  font-size: 14px;
+  margin-top: 15px;
+}
+
+p a {
+  color: #2051d8;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+p a:hover {
+  text-decoration: underline;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Verify Account</h2>
+
+    <div id="successMessage" class="success-message"></div>
+
+    <form id="verifyForm">
+      <input type="email" id="email" name="Email" placeholder="Email" required>
+      <div id="emailError" class="error">Please enter a valid email.</div>
+
+      <input type="text" id="code" name="Code" placeholder="Verification Code" required>
+      <div id="codeError" class="error">Please enter the verification code.</div>
+
+      <button type="submit">Verify</button>
+      <p>Don’t have an account? 
+        <a href="register.html">Sign Up</a>
+      </p>
+    </form>
+</div>
+
+<script>
+// جلب الإيميل من الرابط
+window.onload = function() {
+    const params = new URLSearchParams(window.location.search);
+    const email = params.get('email');
+    if (email) {
+        document.getElementById('email').value = email;
+    }
+};
+
+document.getElementById("verifyForm").addEventListener("submit", function(event) {
+    event.preventDefault(); 
+
+    const email = document.getElementById('email').value.trim();
+    const code = document.getElementById('code').value.trim();
+
+    let valid = true;
+
+    // إخفاء كل الرسائل
+    document.getElementById("emailError").style.display = "none";
+    document.getElementById("codeError").style.display = "none";
+    document.getElementById("successMessage").style.display = "none";
+
+    if (!email || !email.includes("@")) {
+        document.getElementById("emailError").style.display = "block";
+        valid = false;
+    }
+
+    if (!code) {
+        document.getElementById("codeError").style.display = "block";
+        valid = false;
+    }
+
+    if (!valid) return;
+
+    const data = { email, code };
+
+    fetch('https://localhost:7137/api/Account/verify', {
+        method: 'POST',
+        headers: {
+            'accept': '*/*',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => {
+        if (response.ok) {
+            document.getElementById("successMessage").innerText = "✅ Verification Successful! You can now login.";
+            document.getElementById("successMessage").style.display = "block";
+            setTimeout(() => window.location.href = "login.html", 1500);
+        } else {
+            return response.text().then(text => { 
+                document.getElementById("codeError").innerText = "❌ " + text;
+                document.getElementById("codeError").style.display = "block";
+            });
+        }
+    })
+    .catch(error => {
+        document.getElementById("codeError").innerText = "❌ Error: " + error.message;
+        document.getElementById("codeError").style.display = "block";
+    });
+});
+</script>
+</body>
+</html>

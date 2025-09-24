@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f7fa;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      width: 400px;
+    }
+    h2 {
+      text-align: center;
+      color: #2051d8;
+      margin-bottom: 20px;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 14px;
+      color: #333;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+    input:focus {
+      border-color: #2051d8;
+      outline: none;
+    }
+    .error {
+      color: red;
+      font-size: 13px;
+      margin-top: 5px;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #2051d8;
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #2051d8;
+    }
+    /* الرساله */
+    .message {
+      margin-top: 15px;
+      padding: 10px;
+      text-align: center;
+      font-size: 14px;
+      border-radius: 8px;
+      display: none;
+      animation: fadeIn 0.5s ease-in-out;
+    }
+    .message.error {
+      background: #ffe5e5;
+      color: #d9534f;
+      border: 1px solid #d9534f;
+    }
+    .message.success {
+      background: #e5ffe5;
+      color: #2051d8;
+      border: 1px solid #2051d8;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Login</h2>
+    <form id="loginForm">
+      <div class="form-group">
+        <label for="userName">Username</label>
+        <input type="text" id="userName" name="userName" required>
+        <div class="error" id="userNameError"></div>
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required minlength="6">
+        <div class="error" id="passwordError"></div>
+      </div>
+      <button type="submit">Login</button>
+      <p style="text-align: center;">Don't have any account <a href="REGISTER.HTML">Register</a></p>
+    </form>
+    <p id="serverError" class="message"></p>
+  </div>
+
+<script>
+  const form = document.getElementById("loginForm");
+  const userNameError = document.getElementById("userNameError");
+  const passwordError = document.getElementById("passwordError");
+  const serverError = document.getElementById("serverError");
+
+  function parseJwt(token) {
+    try {
+      const base64Url = token.split(".")[1];
+      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split("")
+          .map(c => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+          .join("")
+      );
+      return JSON.parse(jsonPayload);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    userNameError.textContent = "";
+    passwordError.textContent = "";
+    serverError.textContent = "";
+    serverError.style.display = "none";
+
+    const userName = document.getElementById("userName").value.trim();
+    const password = document.getElementById("password").value.trim();
+    let isValid = true;
+
+    if (!userName) {
+      userNameError.textContent = "Username is required";
+      isValid = false;
+    }
+    if (!password) {
+      passwordError.textContent = "Password is required";
+      isValid = false;
+    } else if (password.length < 6) {
+      passwordError.textContent = "Password must be at least 6 characters";
+      isValid = false;
+    }
+
+    if (!isValid) return;
+
+    try {
+      const response = await fetch("https://localhost:7137/api/Account/Login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userName, password })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const token = data.token;
+        localStorage.setItem("token", token);
+
+        const decoded = parseJwt(token);
+        console.log("📌 Decoded Token:", decoded);
+
+        const role = decoded?.Role 
+                  || decoded?.role 
+                  || decoded?.["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+
+        console.log("📌 Extracted Role:", role);
+        localStorage.setItem("role", role);
+
+        serverError.textContent = "✅ Login successful, redirecting...";
+        serverError.className = "message success";
+        serverError.style.display = "block";
+
+        setTimeout(() => {
+          if (role === "Client") {
+            window.location.href = "client.html";
+          } else if (role === "Provider") {
+            window.location.href = "provider.html";
+          } else {
+            alert("⚠️ الدور مش معروف: " + role);
+          }
+        }, 1500);
+      } else {
+        const errorData = await response.json();
+        serverError.textContent = "⚠️ " + (errorData.message || "Invalid credentials");
+        serverError.className = "message error";
+        serverError.style.display = "block";
+      }
+    } catch (err) {
+      serverError.textContent = "⚠️ Server connection error.";
+      serverError.className = "message error";
+      serverError.style.display = "block";
+    }
+  });
+</script>
+
+
+
+
+</body>
+</html>
